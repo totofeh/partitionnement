@@ -363,3 +363,71 @@ void Pseudo_random_partitioning(GraphNonOriente *g, EntiersEntiers &Partition, i
 			break;
 	}
 }
+
+Graphs Multiniveau(int niveau_contraction, GraphNonOriente *g, GraphOriente *go, int nbr_parties, string type_methode, string choix_affinage, string type_cut,Edges &edge_partie , OutputEdgeList &outputedgeslist, InputEdgeList &inputedgelist, Connections &connections){
+	EntiersEntiers Partition;
+	Entiers *part = new Entiers();
+	Base_Graph baseg;
+	baseg.push_back(g);
+	ListEntiersEntiers liste_corr;
+	uint cpt =0;
+	while(num_vertices(*baseg.at(cpt))>niveau_contraction)
+	{
+		contraction_HEM(baseg.at(cpt),baseg,liste_corr);
+		cpt++;
+	}
+
+	for(int i =0;i<num_vertices(*baseg.at(baseg.size()-1));i++)
+	{
+		part->push_back(i);
+	}
+	Partition.push_back(part);
+
+	bissectionRec(baseg.at(baseg.size()-1),Partition,nbr_parties,type_methode);
+
+	ListEntiersEntiers::iterator lit(liste_corr.end());
+	lit--;
+	for(uint y =0; y<liste_corr.size();y++){
+		projection(Partition,lit);
+		double cut = Cut_cluster(Partition,*baseg.at(baseg.size()-2-y),type_cut);
+		cout<<"Cout de coupe avant affinage : "<<cut<<endl;
+
+		if(choix_affinage=="charge")
+			Affinage_equilibrage_charge(baseg.at(baseg.size()-2-y),Partition);
+		else
+			Affinage_recherche_locale(baseg.at(baseg.size()-2-y),Partition,cut,type_cut);
+
+		cout<<"Cout de coupe après affinage : "<<cut<<endl;
+		lit--;
+	}
+
+	Graphs Graphes = Graph_Partition(Partition,go,g,outputedgeslist,inputedgelist,connections);
+
+	for(EntiersEntiers::iterator it = Partition.begin(); it != Partition.end(); it++)
+	{
+		delete *it;
+		*it = NULL;
+	}
+
+	for(ListEntiersEntiers::iterator it = liste_corr.begin(); it != liste_corr.end(); it++)
+	{
+		for(EntiersEntiers::iterator it1 = (*it)->begin(); it1 != (*it)->end(); it1++)
+		{
+			delete *it1;
+			*it1 = NULL;
+		}
+		delete *it;
+		*it = NULL;
+	}
+
+	for(Base_Graph::iterator it = baseg.begin(); it != baseg.end(); it++)
+	{
+		delete *it;
+		*it = NULL;
+	}
+
+	return Graphes;
+
+
+
+}

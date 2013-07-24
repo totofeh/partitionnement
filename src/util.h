@@ -69,6 +69,10 @@ typedef vector < OutputEdges > OutputEdgeList;
 typedef vector < InputEdges > InputEdgeList;
 typedef vector<GraphNonOriente *> Base_Graph;
 
+typedef std::pair < int, int > Port;
+typedef std::pair < Port, Port > Connection;
+typedef std::vector < Connection > Connections;
+
 typedef graph_traits<GraphNonOriente>::vertex_descriptor vertex_t;
 typedef graph_traits<GraphNonOriente>::edge_descriptor edge_t;
 
@@ -90,7 +94,7 @@ extern GraphOriente::vertex_iterator vertexIto, vertexEndo;
 extern GraphOriente::adjacency_iterator neighbourIto, neighbourEndo;
 
 void Global_Neigh_community(GraphNonOriente *g, const EntiersEntiers &Partition, Entiers *community, int vertex, int comm_in);
-Graphs Graph_Partition(const EntiersEntiers &Partition, GraphOriente *go, GraphNonOriente *g, OutputEdgeList &outputedgelist, InputEdgeList &inputedgelist);
+Graphs Graph_Partition(const EntiersEntiers &Partition, GraphOriente *go, GraphNonOriente *g, OutputEdgeList &outputedgelist, InputEdgeList &inputedgelist, Connections &connections);
 void List_edge_partie(Entiers *Partie, GraphOriente *go, Edges &edge_partie, OutputEdges &outputedgespartie);
 void construire_graph(GraphNonOriente *g, GraphOriente *graph);
 double Modif_Cut_one_cluster(Entiers &cluster, GraphNonOriente &g, double &vol);

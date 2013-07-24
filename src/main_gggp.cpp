@@ -12,7 +12,13 @@ int main(){
 	GraphOriente *go = new GraphOriente();
 	construire_graph(g,go);
 
-	EntiersEntiers Partition;
+	int nbr_parties = 3;
+	Edges edge_partie;
+	OutputEdgeList outputedgeslist(nbr_parties);
+	InputEdgeList inputedgelist;
+	Connections connections;
+
+	/*EntiersEntiers Partition;
 	Entiers *part = new Entiers();
 	Base_Graph baseg;
 	baseg.push_back(g);
@@ -49,7 +55,7 @@ int main(){
 	}
 	Partition.push_back(part);
 
-	bissectionRec(baseg.at(baseg.size()-1),Partition,2,"gggp_pond");
+	bissectionRec(baseg.at(baseg.size()-1),Partition,3,"gggp_pond");
 	//Pseudo_random_partitioning(g,Partition,3);
 	cout<<"Nombre de parties : "<<Partition.size()<<endl;
 
@@ -116,12 +122,14 @@ int main(){
 	cout<<"mathieu va me buter ! et en plus c'est walker !!!"<<endl;
 	cout<<"\n"<<endl;
 
-	Edges edge_partie;
-	OutputEdgeList outputedgeslist(Partition.size());
-	InputEdgeList inputedgelist;
 
-	Graphs Graphes = Graph_Partition(Partition,go,g,outputedgeslist,inputedgelist);
 
+	Graphs Graphes = Graph_Partition(Partition,go,g,outputedgeslist,inputedgelist,connections);*/
+
+	Graphs Graphes = Multiniveau(4,g,go,nbr_parties,"gggp_pond","cut_norm","norm",edge_partie ,outputedgeslist, inputedgelist, connections);
+
+	cout<<"\n"<<endl;
+	cout<<"Sous Graphes : "<<endl;
 	for(uint i = 0; i<Graphes.size();i++){
 		tie(vertexIto, vertexEndo) = vertices(*Graphes.at(i));
 		for (; vertexIto != vertexEndo; ++vertexIto)
@@ -153,8 +161,14 @@ int main(){
 		cout<<"\n"<<endl;
 	}
 
+	clog<<"Connections : "<<endl;
+	for(uint i = 0; i< connections.size() ; i++)
+	{
+		cout<<connections.at(i).first.first<<connections.at(i).first.second<<" "<<connections.at(i).second.first<<connections.at(i).second.second<<endl;
+	}
 
-	for(EntiersEntiers::iterator it = Partition.begin(); it != Partition.end(); it++)
+
+	/*for(EntiersEntiers::iterator it = Partition.begin(); it != Partition.end(); it++)
 	{
 		delete *it;
 		*it = NULL;
@@ -175,7 +189,7 @@ int main(){
 	{
 		delete *it;
 		*it = NULL;
-	}
+	}*/
 
 	for(Graphs::iterator it = Graphes.begin(); it != Graphes.end(); it++)
 	{

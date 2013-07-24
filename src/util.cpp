@@ -1193,7 +1193,7 @@ void Global_Neigh_community(GraphNonOriente *g,const EntiersEntiers &Partition, 
 	}
 }
 
-Graphs Graph_Partition(const EntiersEntiers &Partition, GraphOriente *go,GraphNonOriente *g, OutputEdgeList &outputedgelist, InputEdgeList &inputedgelist){
+Graphs Graph_Partition(const EntiersEntiers &Partition, GraphOriente *go,GraphNonOriente *g, OutputEdgeList &outputedgelist, InputEdgeList &inputedgelist, Connections &connections){
 
 	Graphs graph_partie;
 	EntiersEntiers neigh_community;
@@ -1225,6 +1225,24 @@ Graphs Graph_Partition(const EntiersEntiers &Partition, GraphOriente *go,GraphNo
 			}
 		}
 		inputedgelist.push_back(inputedges);
+	}
+
+	for(uint i =0;i<outputedgelist.size();i++){
+		Connection connec;
+		for(uint j =0; j<outputedgelist.at(i).size();j++){
+			Port port1;
+			port1.first = i;
+			port1.second = outputedgelist.at(i).at(j).first;
+
+			Port port2;
+			port2.first = In_community_dichotomie(Partition,outputedgelist.at(i).at(j).second);
+			port2.second = outputedgelist.at(i).at(j).second;
+
+			connec.first = port1;
+			connec.second = port2;
+
+			connections.push_back(connec);
+		}
 	}
 
 	for(EntiersEntiers::iterator it = neigh_community.begin(); it != neigh_community.end(); it++)
