@@ -9,7 +9,8 @@ int main(){
 
 	srand((unsigned)time(NULL));
 	GraphNonOriente *g = new GraphNonOriente();
-	construire_graph(g);
+	GraphOriente *go = new GraphOriente();
+	construire_graph(g,go);
 
 	EntiersEntiers Partition;
 	Entiers *part = new Entiers();
@@ -17,18 +18,16 @@ int main(){
 	baseg.push_back(g);
 	ListEntiersEntiers liste_corr;
 	uint cpt=0;
-	//while(num_vertices(*baseg.at(cpt))>4)
-	//{
+	while(num_vertices(*baseg.at(cpt))>4)
+	{
 		contraction_HEM(baseg.at(cpt),baseg,liste_corr);
 		cpt++;
-	//}
+	}
 
 	edge_t e1;
 	bool found;
 	for(uint i=0;i<baseg.size();i++){
-		property_map<GraphNonOriente,edge_weight_t>::type poids_arc=get(edge_weight_t(),*baseg.at(i));
 		tie(vertexIt, vertexEnd) = vertices((*baseg.at(i)));
-		property_map<GraphNonOriente,vertex_degree_t>::type poids_sommets=get(vertex_degree_t(),(*baseg.at(i)));
 		for (; vertexIt != vertexEnd; ++vertexIt)
 		{
 			cout << *vertexIt << " est connecté avec ";
@@ -36,21 +35,22 @@ int main(){
 			for (; neighbourIt != neighbourEnd; ++neighbourIt){
 				cout << *neighbourIt << " ";
 				tie(e1,found)=edge(vertex(*vertexIt,*baseg.at(i)),vertex(*neighbourIt,*baseg.at(i)),*baseg.at(i));
-				cout << "poids arc : "<<get(poids_arc,e1)<<"\n";
+				cout << "poids arc : "<<(*baseg.at(i))[e1]._weight<<"\n";
 			}
-			cout<<" et son poids est de "<< poids_sommets[*vertexIt]<<endl;
+			cout<<" et son poids est de "<< (*baseg.at(i))[*vertexIt]._weight<<endl;
 		}
 		cout<<"\n"<<endl;
 	}
 
 
-	for(int i =0;i<num_vertices(*(baseg.at(baseg.size()-1)));i++)
+	for(int i =0;i<num_vertices(*baseg.at(baseg.size()-1));i++)
 	{
 		part->push_back(i);
 	}
 	Partition.push_back(part);
 
-	bissectionRec(*(baseg.at(baseg.size()-1)),Partition,3,"gggp_pond");
+	bissectionRec(baseg.at(baseg.size()-1),Partition,2,"gggp_pond");
+	//Pseudo_random_partitioning(g,Partition,3);
 	cout<<"Nombre de parties : "<<Partition.size()<<endl;
 
 	clog<<"Resultat de la partition : "<<endl;
@@ -59,7 +59,7 @@ int main(){
 	{
 		for(uint j = 0 ; j<Partition.at(i)->size() ; j++)
 		{
-			cout<<Partition.at(i)->at(j)<<endl;
+			cout<<(*baseg.at(baseg.size()-1))[Partition.at(i)->at(j)]._index<<endl;
 		}
 		cout<<"\n"<<endl;
 	}
@@ -116,6 +116,44 @@ int main(){
 	cout<<"mathieu va me buter ! et en plus c'est walker !!!"<<endl;
 	cout<<"\n"<<endl;
 
+	Edges edge_partie;
+	OutputEdgeList outputedgeslist(Partition.size());
+	InputEdgeList inputedgelist;
+
+	Graphs Graphes = Graph_Partition(Partition,go,g,outputedgeslist,inputedgelist);
+
+	for(uint i = 0; i<Graphes.size();i++){
+		tie(vertexIto, vertexEndo) = vertices(*Graphes.at(i));
+		for (; vertexIto != vertexEndo; ++vertexIto)
+		{
+			cout << (*Graphes.at(i))[*vertexIto]._index << " est connecté avec ";
+			tie(neighbourIto, neighbourEndo) = adjacent_vertices(*vertexIto,*Graphes.at(i));
+			for (; neighbourIto != neighbourEndo; ++neighbourIto)
+				cout << (*Graphes.at(i))[*neighbourIto]._index << " ";
+			cout<<" et son poids est de "<< (*Graphes.at(i))[*vertexIto]._weight<<endl;
+		}
+		cout<<"\n"<<endl;
+	}
+
+	clog<<"OutputEdgeList : "<<endl;
+	for(uint i = 0; i< outputedgeslist.size() ; i++)
+	{
+		for(uint j = 0; j< outputedgeslist.at(i).size(); j++){
+			cout<<outputedgeslist.at(i).at(j).first<<" "<<outputedgeslist.at(i).at(j).second<<endl;
+		}
+		cout<<"\n"<<endl;
+	}
+
+	clog<<"InputEdgeList : "<<endl;
+	for(uint i = 0; i< inputedgelist.size() ; i++)
+	{
+		for(uint j = 0; j< inputedgelist.at(i).size(); j++){
+			cout<<inputedgelist.at(i).at(j).first<<" "<<inputedgelist.at(i).at(j).second<<endl;
+		}
+		cout<<"\n"<<endl;
+	}
+
+
 	for(EntiersEntiers::iterator it = Partition.begin(); it != Partition.end(); it++)
 	{
 		delete *it;
@@ -139,6 +177,13 @@ int main(){
 		*it = NULL;
 	}
 
+	for(Graphs::iterator it = Graphes.begin(); it != Graphes.end(); it++)
+	{
+		delete *it;
+		*it = NULL;
+	}
+
+	delete go;
 
 	 t = clock() - t;
 	 printf ("It took me (%f seconds).\n",((double)t)/CLOCKS_PER_SEC);

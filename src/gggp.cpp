@@ -3,11 +3,11 @@
 using namespace std;
 using namespace boost;
 
-void gggp(GraphNonOriente &g,Entiers &sommetsSource, Entiers &sommetsDestination,EntiersEntiers &Partition)
+void gggp(GraphNonOriente *g,Entiers *sommetsSource, Entiers *sommetsDestination,EntiersEntiers &Partition)
 {
 	int val;
 	Entiers sommets_adj;
-	if((sommetsSource.size()-1)==0)
+	if((sommetsSource->size()-1)==0)
 	{
 		val=0;
 		//cout<<"Entré dans le debug ! "<<endl;
@@ -21,22 +21,22 @@ void gggp(GraphNonOriente &g,Entiers &sommetsSource, Entiers &sommetsDestination
 		for(int i=0; i<Partition.size();i++)
 		{
 			if(Partition.at(i)->size()==tmp)
-				gggp(g,*(Partition.at(i)),sommetsDestination,Partition);
+				gggp(g,Partition.at(i),sommetsDestination,Partition);
 			break;
 		}
 	}
 	else
-		val=rand_fini(0,sommetsSource.size()-1);//Tirage aléatoire de l'indice du premier sommet entre 0 et taille du tableau -1
+		val=rand_fini(0,sommetsSource->size()-1);//Tirage aléatoire de l'indice du premier sommet entre 0 et taille du tableau -1
 
-	float poids_max=sommetsSource.size()/2.;
+	float poids_max=sommetsSource->size()/2.;
 	float poids=1;
 	Entiers sommets_cut;
 
 	//clog<<"Etape 1 : "<<endl;
-	sommetsDestination.push_back(sommetsSource[val]);
-	sommetsSource.erase(sommetsSource.begin() + val);
+	sommetsDestination->push_back(sommetsSource->at(val));
+	sommetsSource->erase(sommetsSource->begin() + val);
 
-	if(sommetsSource.size()<2)
+	if(sommetsSource->size()<2)
 		return;
 
 	while(poids<poids_max)
@@ -44,7 +44,7 @@ void gggp(GraphNonOriente &g,Entiers &sommetsSource, Entiers &sommetsDestination
 //		for(uint i =0; i< sommetsDestination.size();i++){
 //			cout<<sommetsDestination.at(i)<<endl;
 //		}
-		Liste_Voisin(sommetsDestination,sommets_adj,g);
+		Liste_Voisin(*sommetsDestination,sommets_adj,*g);
 		if((sommets_adj.size()==0))
 		{
 			cout<<"Je suis sorti !!!! "<<endl;
@@ -59,20 +59,11 @@ void gggp(GraphNonOriente &g,Entiers &sommetsSource, Entiers &sommetsDestination
 			sort(sommets_adj);
 			for(int i=0;i<sommets_adj.size();i++)
 			{
-				sommets_cut.push_back(Cout_coupe(sommetsDestination,sommets_adj[i],g));
+				sommets_cut.push_back(Cout_coupe(*sommetsDestination,sommets_adj[i],*g));
 			}
-			/*cout<<"\n"<<endl;
-			cout<<"Cout de coupe : "<<endl;
-			for(int i=0;i<sommets_cut.size();i++)
-			{
-				cout<<sommets_cut[i]<<endl;
-			}*/
 			int tmp = recherche_val(sommets_cut,*min_element(sommets_cut.begin(),sommets_cut.end()));
-			sommetsDestination.push_back(sommets_adj[tmp]);
-			//cout<<"\n"<<endl;
-			//cout<<"indice du coup de coupe minimum : "<<recherche_val(sommets_cut,*min_element(sommets_cut.begin(),sommets_cut.end()))<<endl;
-			//cout<<"Valeur du coup de coupe minimum : "<<sommets_adj[recherche_val(sommets_cut,*min_element(sommets_cut.begin(),sommets_cut.end()))]<<endl;
-			suprim_val(sommetsSource, sommets_adj[tmp]);
+			sommetsDestination->push_back(sommets_adj[tmp]);
+			suprim_val(*sommetsSource, sommets_adj[tmp]);
 			suprim_val(sommets_adj, sommets_adj[tmp]);
 
 			sommets_cut.clear();
@@ -81,58 +72,53 @@ void gggp(GraphNonOriente &g,Entiers &sommetsSource, Entiers &sommetsDestination
 		}
 	}
 
-	for (int i=0; i<sommetsSource.size();i++)
+	for (int i=0; i<sommetsSource->size();i++)
 	{
-		for (int j=0; j<sommetsDestination.size();j++)
+		for (int j=0; j<sommetsDestination->size();j++)
 		{
-			remove_edge(sommetsSource[i],sommetsDestination[j],g);
+			remove_edge(sommetsSource->at(i),sommetsDestination->at(j),*g);
 		}
 	}
 
-	sort(sommetsDestination);
+	sort(*sommetsDestination);
 }
 
-void gggp_pond(GraphNonOriente &g,Entiers &sommetsSource, Entiers &sommetsDestination,EntiersEntiers &Partition){
-	property_map<GraphNonOriente,vertex_degree_t>::type poids_sommets=get(vertex_degree_t(),g);
+void gggp_pond(GraphNonOriente *g,Entiers *sommetsSource, Entiers *sommetsDestination,EntiersEntiers &Partition){
 	int val;
 	Entiers sommets_adj;
-	if((sommetsSource.size()-1)==0){
+	if((sommetsSource->size()-1)==0){
 		val=0;
 		cout<<"Entré dans le debug ! "<<endl;
 		Entiers tailles;
 		for(int i=0;i<Partition.size();i++){
-			tailles.push_back((*Partition.at(i)).size());
+			tailles.push_back(Partition.at(i)->size());
 		}
 		int tmp=*max_element(tailles.begin(),tailles.end());
 		for(int i=0; i<Partition.size();i++){
 			if(Partition.at(i)->size()==tmp)
-				gggp_pond(g,*Partition[i],sommetsDestination,Partition);
+				gggp_pond(g,Partition[i],sommetsDestination,Partition);
 			break;
 		}
 	}
 	else
-		val=rand_fini(0,sommetsSource.size()-1);//Tirage aléatoire de l'indice du premier sommet entre 0 et taille du tableau -1
-	//cout<<"Sommet de départ : "<<sommetsSource[val]<<endl;
-	//	cout<<"\n"<<endl;
-	float poids_max=0;
-	for(int i=0;i<sommetsSource.size();i++){
-		poids_max+=poids_sommets[sommetsSource[i]];
+		val=rand_fini(0,sommetsSource->size()-1);//Tirage aléatoire de l'indice du premier sommet entre 0 et taille du tableau -1
+	double poids_max=0;
+	for(int i=0;i<sommetsSource->size();i++){
+		poids_max+=(*g)[sommetsSource->at(i)]._weight;
 	}
 	poids_max/=2.;
-	cout<<"Le moitié du poids total est de : "<<poids_max<<endl;
-	cout<<"\n"<<endl;
-	float poids=poids_sommets[sommetsSource[val]];
+	double poids=(*g)[sommetsSource->at(val)]._weight;
 	vector<float> sommets_cut;
 
-	sommetsDestination.push_back(sommetsSource.at(val));
-	sommetsSource.erase(sommetsSource.begin() + val);
+	sommetsDestination->push_back(sommetsSource->at(val));
+	sommetsSource->erase(sommetsSource->begin() + val);
 
-	if(sommetsSource.size()<2)
+	if(sommetsSource->size()<2)
 			return;
 
 	while(poids<poids_max)
 	{
-		Liste_Voisin(sommetsDestination,sommets_adj,g);
+		Liste_Voisin(*sommetsDestination,sommets_adj,*g);
 		if((sommets_adj.size()==0))
 		{
 			cout<<"Je suis sorti !!!! "<<endl;
@@ -143,11 +129,11 @@ void gggp_pond(GraphNonOriente &g,Entiers &sommetsSource, Entiers &sommetsDestin
 
 			for(int i=0;i<sommets_adj.size();i++)
 			{
-				sommets_cut.push_back(Cout_coupe_pond(sommetsDestination,sommets_adj[i],g));
+				sommets_cut.push_back(Cout_coupe_pond(*sommetsDestination,sommets_adj[i],*g));
 			}
-			sommetsDestination.push_back(sommets_adj[recherche_val2(sommets_cut,*min_element(sommets_cut.begin(),sommets_cut.end()))]);
-			poids+=poids_sommets[sommets_adj[recherche_val2(sommets_cut,*min_element(sommets_cut.begin(),sommets_cut.end()))]];
-			suprim_val(sommetsSource, sommets_adj[recherche_val2(sommets_cut,*min_element(sommets_cut.begin(),sommets_cut.end()))]);
+			sommetsDestination->push_back(sommets_adj[recherche_val2(sommets_cut,*min_element(sommets_cut.begin(),sommets_cut.end()))]);
+			poids+=(*g)[sommets_adj[recherche_val2(sommets_cut,*min_element(sommets_cut.begin(),sommets_cut.end()))]]._weight;
+			suprim_val(*sommetsSource, sommets_adj[recherche_val2(sommets_cut,*min_element(sommets_cut.begin(),sommets_cut.end()))]);
 			suprim_val(sommets_adj, sommets_adj[recherche_val2(sommets_cut,*min_element(sommets_cut.begin(),sommets_cut.end()))]);
 
 			sommets_cut.clear();
@@ -155,20 +141,26 @@ void gggp_pond(GraphNonOriente &g,Entiers &sommetsSource, Entiers &sommetsDestin
 		}
 	}
 
-	for (int i=0; i<sommetsSource.size();i++)
+	edge_t e1;
+	bool found;
+
+	for (int i=0; i<sommetsSource->size();i++)
 	{
-		for (int j=0; j<sommetsDestination.size();j++)
+		for (int j=0; j<sommetsDestination->size();j++)
 		{
-			remove_edge(sommetsSource[i],sommetsDestination[j],g);
+			//tie(e1,found)=edge(vertex(sommetsSource->at(i),*g),vertex(sommetsDestination->at(j),*g),*g);
+			//if((*g)[e1]._weight!=0){
+				remove_edge(sommetsSource->at(i),sommetsDestination->at(j),*g);
+			//}
 		}
 	}
 
-	sort(sommetsDestination);
+	sort(*sommetsDestination);
 }
 
-void Iter_2l(EntiersEntiers &part, int nbr_parties, GraphNonOriente &g,const string &nom)
+void Iter_2l(EntiersEntiers &part, int nbr_parties, GraphNonOriente *g,const string &nom)
 {
-	if (nom=="gggp"){
+	if (nom!="gggp_pond"){
 		//cout<<"je jsuis dans gggp"<<endl;
 
 		for(int i = 0; i<floor(log(nbr_parties)/log(2)); i++)
@@ -177,7 +169,7 @@ void Iter_2l(EntiersEntiers &part, int nbr_parties, GraphNonOriente &g,const str
 			for(int j = 0; j< pow(2,i);j++)
 			{
 				Entiers *Q = new Entiers();
-				gggp(g,*part[j],*Q,part);
+				gggp(g,part[j],Q,part);
 				part.push_back(Q);
 			}
 
@@ -203,11 +195,12 @@ void Iter_2l(EntiersEntiers &part, int nbr_parties, GraphNonOriente &g,const str
 			for(int j = 0; j< pow(2,i);j++)
 			{
 				Entiers *Q = new Entiers();
-				gggp_pond(g,*part[j],*Q,part);
+				gggp_pond(g,part.at(j),Q,part);
+				clog<<"sortie du gggp_pond"<<endl;
 				part.push_back(Q);
 			}
 
-			/*cout<<"****"<<endl;
+			cout<<"****"<<endl;
 			for(int k=0; k<part.size(); k++)
 			{
 				for(int j=0; j<part[k]->size(); j++)
@@ -217,12 +210,12 @@ void Iter_2l(EntiersEntiers &part, int nbr_parties, GraphNonOriente &g,const str
 				cout<<"\n"<<endl;
 			}
 			cout<<"****"<<endl;
-			cout<<"taille du tableau : "<<part.size()<<endl;*/
+			cout<<"taille du tableau : "<<part.size()<<endl;
 		}
 	}
 }
 
-void bissectionRec(GraphNonOriente &g,EntiersEntiers &Partition,int nbr_parties,const string &nom)
+void bissectionRec(GraphNonOriente *g,EntiersEntiers &Partition,int nbr_parties,const string &nom)
 {
 	if((nbr_parties&(nbr_parties-1))==0)
 	{
@@ -262,13 +255,111 @@ void bissectionRec(GraphNonOriente &g,EntiersEntiers &Partition,int nbr_parties,
 		cout<<"Et on termine les dernières bissections !!!! "<<endl;*/
 		for(int j = 0; j<nbr_parties-pow(2,puissance_2-1);j++)
 		{
-			Entiers * Q = new Entiers();
-			if(nom=="gggp")
-				gggp(g,*Partition.at(j),*Q,Partition);
+			Entiers *Q = new Entiers();
+			if(nom!="gggp_pond")
+				gggp(g,Partition.at(j),Q,Partition);
 			else
-				gggp_pond(g,*Partition.at(j),*Q,Partition);
+				gggp_pond(g,Partition.at(j),Q,Partition);
 			Partition.push_back(Q);
 			//Q.clear();
 		}
+	}
+}
+
+/**
+ * Fonction réalisant un partitionnement pseudo aléatoire suivant un voisinage.
+ * @param *g : adresse d'un graphe de type boost graphe undirected
+ * @param Partition : vecteur contenant des vecteurs d'entiers [tableau contenant les parties de la partition]
+ * @param nbr_partie : entier correspondant au nombre de parties voulues pour la partition
+ * @return
+ */
+
+void Pseudo_random_partitioning(GraphNonOriente *g, EntiersEntiers &Partition, int nbr_parties){
+	/*
+	 * Principe : distribution des sommets de la première partie en plusieurs autres parties
+	 * Le partitionnement étant pseudo aléatoire il n'y a pas de contrainte stricte sur le nombre
+	 * de sommets par partie
+	 */
+
+
+	int size = Partition.at(0)->size();
+	int cpt_sommets=1;
+	int val;
+	int cpt;
+
+	if(nbr_parties==size){
+		for(uint i = 0; i < nbr_parties;i++){
+			if(Partition.at(0)->size()!=1)
+					{
+						val=rand_fini(0,Partition.at(0)->size()-1);//tirage aléatoire d'un sommets
+					}
+					else
+						val=0;
+			int vertex = Partition.at(0)->at(val);
+			Entiers *part = new Entiers();
+			part->push_back(vertex);// ajout du sommet tiré
+			suprim_val(*Partition.at(0),vertex);//suppression du sommet dans la premiere partie
+
+
+		}
+	}
+	/*
+	 * Boucle sur le nombre de partie à réaliser
+	 */
+	for(uint i = 0; i < nbr_parties-1;i++){
+		if(Partition.at(0)->size()!=1)
+		{
+			val=rand_fini(0,Partition.at(0)->size()-1);//tirage aléatoire d'un sommets
+		}
+		else
+			val=0;
+		int vertex = Partition.at(0)->at(val);
+		/*
+		 * Initialisation d'un pointeur sur un vecteur d'entier, dans notre cas
+		 * la n+1 ième partie de la partition
+		 */
+		Entiers *part = new Entiers();
+		part->push_back(vertex);// ajout du sommet tiré
+		suprim_val(*Partition.at(0),vertex);//suppression du sommet dans la premiere partie
+		cpt=1;
+
+		/*
+		 * Pour chaque element de la nouvelle partie faire
+		 */
+		for(uint j = 0; j<part->size();j++){
+			/*
+			 * Détermination des voisins de chacun des sommets de cette nouvelle
+			 * partie et ajoue de ce voisin si celui-ci est présent dans la première partie (Partition[0])
+			 */
+			tie(neighbourIt, neighbourEnd) = adjacent_vertices(part->at(j),*g);
+			for (; neighbourIt != neighbourEnd; ++neighbourIt){
+				if(In_tab(*Partition.at(0),*neighbourIt)==1){
+					cout<<"le voisin déplacé est : "<<*neighbourIt<<endl;
+					part->push_back(*neighbourIt);
+					cpt_sommets++;
+					suprim_val(*Partition.at(0),*neighbourIt);
+					cpt++;
+				}
+				/*
+				 * Si le nombre moyen de sommets est atteind dans la partie on sort de la boucle des voisins
+				 * Même chose si l'on a rencontré le nombre total de sommets
+				 */
+				if(cpt==(size/nbr_parties)+1)
+					break;
+				if(cpt_sommets==size)
+					break;
+			}
+
+			/*
+			 * Même chose
+			 */
+			if(cpt==(size/nbr_parties)+1)
+				break;
+			if(cpt_sommets==size)
+				break;
+		}
+		Partition.push_back(part);// ajoue de la nouvelle partie à la partition
+		if(cpt_sommets==size)
+			break;
 	}
 }

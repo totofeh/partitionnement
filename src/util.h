@@ -30,18 +30,50 @@
 using namespace std;
 using namespace boost;
 
+struct VertexProperties
+{
+    int          _index;
+    double       _weight;
+
+    VertexProperties() : _index(0), _weight(0)
+    { }
+    VertexProperties(int index, double weight) :
+        _index(index), _weight(weight)
+    { }
+};
+
+struct EdgeProperties
+{
+    double       _weight;
+
+    EdgeProperties() : _weight(0)
+    { }
+    EdgeProperties(double weight) : _weight(weight)
+    { }
+};
+
 typedef unsigned int uint;
 typedef vector<int> Entiers;
 typedef vector<Entiers *> EntiersEntiers;
 typedef vector<EntiersEntiers> EntiersEntiersEntiers;
 typedef list<int> List;
 typedef list<EntiersEntiers *> ListEntiersEntiers;
-typedef property<vertex_degree_t, float> VertexProperty;
-typedef property<edge_weight_t, float> EdgeProperty;
-typedef adjacency_list<vecS,vecS,undirectedS,VertexProperty,EdgeProperty> GraphNonOriente;
+typedef adjacency_list<vecS, vecS, directedS, VertexProperties, EdgeProperties> GraphOriente;
+typedef vector < GraphOriente *> Graphs;
+typedef adjacency_list<vecS, vecS, undirectedS, VertexProperties, EdgeProperties> GraphNonOriente;
+typedef std::pair < int, int > Edge;
+typedef vector < Edge > Edges;
+typedef Edges OutputEdges;
+typedef Edges InputEdges;
+typedef vector < OutputEdges > OutputEdgeList;
+typedef vector < InputEdges > InputEdgeList;
 typedef vector<GraphNonOriente *> Base_Graph;
+
 typedef graph_traits<GraphNonOriente>::vertex_descriptor vertex_t;
 typedef graph_traits<GraphNonOriente>::edge_descriptor edge_t;
+
+typedef GraphOriente::vertex_descriptor vertex_to;
+typedef GraphOriente::edge_descriptor edge_to;
 
 template <class G> struct VertexAndEdgeListGraphConcept {
 	void constraints() {
@@ -52,12 +84,17 @@ template <class G> struct VertexAndEdgeListGraphConcept {
 
 
 extern GraphNonOriente::vertex_iterator vertexIt, vertexEnd;
-//extern GraphNonOriente::edge_iterator edgeIt, edgeEnd;
 extern GraphNonOriente::adjacency_iterator neighbourIt, neighbourEnd;
 
+extern GraphOriente::vertex_iterator vertexIto, vertexEndo;
+extern GraphOriente::adjacency_iterator neighbourIto, neighbourEndo;
 
+void Global_Neigh_community(GraphNonOriente *g, const EntiersEntiers &Partition, Entiers *community, int vertex, int comm_in);
+Graphs Graph_Partition(const EntiersEntiers &Partition, GraphOriente *go, GraphNonOriente *g, OutputEdgeList &outputedgelist, InputEdgeList &inputedgelist);
+void List_edge_partie(Entiers *Partie, GraphOriente *go, Edges &edge_partie, OutputEdges &outputedgespartie);
+void construire_graph(GraphNonOriente *g, GraphOriente *graph);
 double Modif_Cut_one_cluster(Entiers &cluster, GraphNonOriente &g, double &vol);
-vector<double> modif_cut_tmp(GraphNonOriente *g, EntiersEntiers &Partition, int vertexs, int comm_in, Entiers community, double cut,string name);
+vector<double> modif_cut_tmp(GraphNonOriente *g, EntiersEntiers &Partition, vector<vector<double> > tabe_cut, int vertexs, int comm_in, Entiers community, double cut,string name);
 double Calcul_poids(Entiers *partie, GraphNonOriente *g);
 bool Est_connexe(GraphNonOriente *g, EntiersEntiers Partition, Entiers &part);
 void Affinage_equilibrage_charge(GraphNonOriente *g, EntiersEntiers &Partition);
@@ -67,7 +104,7 @@ void Affinage_recherche_locale(GraphNonOriente *g, EntiersEntiers &Partition, do
 void projection(EntiersEntiers &Partition,ListEntiersEntiers::iterator lit);
 void contraction_HEM(GraphNonOriente *g, Base_Graph &baseg, ListEntiersEntiers &liste_corr);
 Entiers Liste_adjacence(GraphNonOriente &g, int vertexs, const Entiers &random_vertices);
-void construire_graph(GraphNonOriente *g);
+
 int rand_fini(int a, int b);
 int recherche_val2(const vector<float> &tab,float val);
 int recherche_val_double(const vector<double> &tab,double val);
@@ -80,14 +117,8 @@ double Cut_cluster(const EntiersEntiers &tab_cluster,GraphNonOriente &g, string 
 void Modif_fonction_Gain_Cut(EntiersEntiers &Partition,GraphNonOriente *g,int community_out,int community_in,int val,double &cut);
 void Liste_Voisin(Entiers &P,Entiers &tab,const GraphNonOriente &g);
 int Cout_coupe(Entiers P,int val, GraphNonOriente &g);
-float Cout_coupe_pond(Entiers P,int val, GraphNonOriente &g);
-//double In_modularity(GraphNonOriente &g , const Entiers &cluster);
-//double Modularity(GraphNonOriente &g,const EntiersEntiers &part);
+double Cout_coupe_pond(Entiers P,int val, GraphNonOriente &g);
 int In_community_dichotomie(const EntiersEntiers &part, int val);
-//double Modularity_gain(double cur_mod , int val , int neight , int node_comm , EntiersEntiers part , const GraphNonOriente &g);
-//double Modularity_gain_phase_2(double cur_mod , Entiers tmp_community  , int neight , int node_comm , EntiersEntiers part , GraphNonOriente &g);
-//Entiers Neight_community(const EntiersEntiers &part, int val , GraphNonOriente &g);
-//Entiers Part_Neight_community(const EntiersEntiers &part,int community, GraphNonOriente &g);
 double Degree(GraphNonOriente &g , int node);
 double Cluster_Degree(GraphNonOriente &g , const Entiers &cluster);
 
